@@ -59,24 +59,99 @@ Our project contains the next python files:
 NOTE - we decide to implement some of your code as classes for modularity and convenient reasons.
 word2vec_builder.py - This file is related to building and utilizing the word2vec model. It defines functions to process lyric data, including cleaning the text, tokenization, and stop word removal. Functions are included to load a pre-trained word2vec model from Google.
 input_sequences_creator.py - Contains a class that deals with creating designed data loaders for training our model.
-midi_data_loader.py - Contains a class to handle the midi files. It preproccess the midi files and extract features. 
+midi_data_loader.py - Contains a class to handle the midi files and preproccess the songs lyrics. 
 model_lstm_lyrics_only.py - Contains a model (also a class) of an LSTM that generates lyrics without melodies.
-melodies_features.py - 
+melodies_features.py - This file contains functions to extract features from the melodies in the midi files. 
 model_lstm_with_melodies.py - Contains a model (also a class) of an LSTM that generates lyrics with melodies.
-experiments.py
-evaluation.py
+experiments.py - The Training loop with/without melodies and the experiments setup.
+evaluation.py - Since evluating process is a complex task we created a class called LyricsEvaluator to implement many kind of evluation metrics. 
   
 ## Model Architecture:
-  ### Without melodies:
-  ### With melodies:
+In our work, there are 2 main models, one with features from the midi files (melodies) and another without these features. Each model is built in its own class. Each class has a constructor and a forward method that we implemented. As a base for our models, we used a familiar RNN layer – LSTM. We used LSTM as our basis for two main reasons:
+-	Capturing long-term dependencies: LSTMs are designed to capture those dependencies in sequential data like songs in this case. When generating lyrics to songs (or text in general), it's important to consider not only the immediately preceding words but also the context from farther back in the sequence (or ahead).
+-	Handling variable-length sequences: it is not surprising that songs don’t have the same length, thus we should use a layer that can handle varying lengths.
 
-## Training Process:
+To explore the model’s capacity to capture and represent information at different levels of abstraction, we used different numbers of units for the LSTM:
+•	32 units – we used the smaller number of units of 32, to have a more compact representation of the data and potentially improve generalization by reducing the risk of overfitting. This can be beneficial when dealing with simpler patterns or datasets with limited complexity, therefore we can guess that a model without the melodies features will produce good results with this parameter value.
+•	256 units – we also used a larger number of units to try to increase the model's capacity to capture complex patterns within the data. This can be beneficial for more complex datasets or tasks that require the model to learn more "soft" relationships between input features. We expect that with this parameter value, the models that include the melodies features will achieve better results.
 
-## Evaluation:
-  ### Metrics:
-  ### Combination tried:
-  ### Results:
-  ### TensorBoard:
+### Without melodies:
+•	Model layers:
+Embedding layer – this layer receives the word2vec matrix (size = num of words in corpus X vector embedding size) as the layer's weights, these weights do not get updated (we don’t need to learned new word embedding).
+LSTM layer – this layer is for learning from the sequences "through time". The input is the size of the embedding vector. After searching online, we decided to use 2 layers for this part (num_layers=2, should be sufficient). Another important aspect of this layer is that this is a Bidirectional RNN to enable the model to learn from different orders of the sequence (not only from start to end but also in the opposite direction). 
+Dropout layer – we added this layer to the model because we wanted to explore if this additional layer can help (we experimented with varying rates). 
+Fully-Connected layer – this layer input is twice the size of the LSTM units since the LSTM layer is bidirectional. The output of this layer is the size of our entire corpus. 
+•	Forward pass:
+As input, we get a sequence of "words as integers", for example- "i love you" sequence will be inputted to the model as [23, 44, 899]. 
+First, we insert the input into the embedding layer, and then to the LSTM layer. From the LSTM layer, we get the hidden output. 
+This output is then inputted to a dropout layer. 
+After that we take the output of the last unit in the LSTM. 
+The final step is to insert this output into the fully connected layer.
 
-## Conclusions:
+### With melodies:
+-	Our second model differs from the first model mostly by the input sizes and number of inputs.
+While the first model gets one input, the second model gets two inputs – the lyrics input and the melodies input. We can see this modification in the size of the LSTM layer.
+This modification can also be seen in the forward pass, where we concatenate the input of the lyrics with the input of the melodies. 
+-	Another important note is that we tried this model with two different kinds of features for the melodies (type T1 and type T2 as explained before). So, while the structure of the model remains quite the same, the size of the input features is different. 
+Changes from Model #1:
+-	Concatenate Features layer – this layer is only defined in the forward pass. Its purpose is to add to the embedding layer, which consists of the features for the lyrics, the features that were extracted for the melodies, either of type T1 or T2 (the type affects the input size).
+-	In the forward pass of Model #2, after the embedding layer, the concatenation layer concatenates the melodies features to the embedding layer, and then the concatenation layer passes to the LSTM layer and so on, like in Model #1.
+
+## Experiments: 
+In this part, we focused on running multiple experiments to explore our models’ performance. We used different values for the following parameters in our experiments:
+<img width="446" alt="image" src="https://github.com/ShaharBenIshay/Song-Lyrics-Generator-LSTM/assets/93884611/68fd1b99-1b79-4aa9-9f0a-840b2f52b089">
+
+NOTES: 
+We ran only 5 epochs for each experiment, due to our limited computation resources (our personal computers).
+We also faced challenges when running the model with a sequence length of 1 as instructed, therefore we tried also longer sequences of length 5. The reason for this problem is that when using sequences of length 1, "more" data is created to be inputted of the data.
+
+We started with running the above experiments and evaluating them only with scores – cosine and Jaccard, and training loss. We will later dive into more complex evaluations after drawing our final conclusions from the experiments.
+
+<img width="583" alt="image" src="https://github.com/ShaharBenIshay/Song-Lyrics-Generator-LSTM/assets/93884611/9d88e9c3-d925-4c31-9d35-852a6032649b">
+
+-	First, the most significant conclusion is that most of the best experiments ran with a batch size of 32 and a sequence length of 5. We will fix those parameter values before continuing to experiment.
+-	It is hard to determine what learning rate, melodies features type and dropout rate are the best.
+-	Although only one experiment with num_LSTM_units=256 showed good results, still it is the 2nd best.
+
+<img width="597" alt="image" src="https://github.com/ShaharBenIshay/Song-Lyrics-Generator-LSTM/assets/93884611/d9fa909c-53d6-47c9-ae74-b4ac106c2222">
+
+NOTE: For those experiments, we added another evaluation method – cosine similarity for songs.
+
+We can see that now 256 units for LSTM achieve the best results. We will continue to the evaluation part with this parameter value.
+We still got mixed results regarding the dropout rate. We decided to fix the dropout rate to 0.4 to use it as a method for regularization and generalization for the models.
+We will further evaluate these 3 models in the 'Evaluation' section, after implementing the above conclusions.
+
+## Evaluation
+First, we will explain the various evaluation metrics we used to evaluate the lyrics generated:
+•	Cosine Similarity - Sequences: with this evaluation metric we computed the score for each sequence (according to the true song sequence) and then computed the average score among all sequences for all songs. Our comparison was made sequence-to-sequence because we care not only about predicting the "right" word but the “right” word in the "right" time. For example, if the word "love" was predicted in the first part, but the word "love" is at the end of the song – we don’t want to consider this as a perfect match.
+•	Cosine Similarity - Songs: we used this evaluation metric the same way as cosine similarity for sequences. The difference is that this metric is computed over whole songs, therefore it gives us a “feel” of how the entire generated song is similar to the original lyrics.
+•	Jaccard Similarity: with this metric, we wanted to evaluate if our model was able to predict the exact words in the original lyrics. 
+•	Sentiment Analysis: this metric is important since the task of predicting the exact same words is a very complicated task, but capturing the context and the sentiment of the song is a much more possible task. After searching online, we found VADER (Valence Aware Dictionary and sEntiment Reasoner), which is a lexicon and rule-based sentiment analysis tool used to calculate the polarity scores of the given text. VADER computes (the sentiment) for every song the neg (negative), neu(neutral), pos (positive), and compounds the scores.
+•	Polarity & Subjectivity: since we didn’t get much information from VADER, we used TextBlob. We used this object to compute the average polarity and subjectivity for each song – true and generated. Polarity indicates whether the text expresses a positive, negative, or neutral sentiment as explained above. Subjectivity is another NLP aspect, which refers to how the text expresses opinions, beliefs, and feelings. A score close to 0 indicates high objectivity, meaning that the text is predominantly factual and lacks subjective expressions. A score close to 1 indicates high subjectivity, meaning that the text contains a significant number of subjective opinions or emotions.
+
+Now we will present the evaluations on the 3 experiments from the 'Experiments' section.
+We ran those experiments with same parameters for the models:
+-	Batch size = 32
+-	Sequence Length = 5
+-	Num LSTM Units = 256
+-	Learning Rate = 0.001
+-	Number of Epochs = 5
+-	Dropout Rate = 0.4
+
+<img width="595" alt="image" src="https://github.com/ShaharBenIshay/Song-Lyrics-Generator-LSTM/assets/93884611/7967ed27-eb43-4c30-9e00-d08adb7bf490">
+
+## TensorBoard:
+
+
+
+
+
+
+
+
+
+
+
+
+
 
