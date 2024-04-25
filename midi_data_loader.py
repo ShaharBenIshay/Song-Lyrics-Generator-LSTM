@@ -34,7 +34,7 @@ class MidiDataLoader:
         for i in tqdm(range(num_songs)):
             artist, song_name = artists[i], songs_names[i]
             if song_name[0] == " ":
-                song_name = song_name[1:]   # why ? because some of the songs names are like:' name' instead of:'name'
+                song_name = song_name[1:]  # why? because some songs names are like:' name' instead of:'name'
             artist = artist.replace(" ", "_")
             song_name = song_name.replace(" ", "_")
             song_full_name = f"{artist}_-_{song_name}.mid"
@@ -53,11 +53,9 @@ class MidiDataLoader:
         self._try_save_pkl(midi_pkl_path, pretty_midi_songs)
         return pretty_midi_songs
 
-
     def _try_save_pkl(self, midi_pkl_path, pretty_midi_songs):
         with open(midi_pkl_path, 'wb') as file:
             pickle.dump(pretty_midi_songs, file)
-
 
     def _try_read_pkl(self, midi_pkl_path):
         if os.path.exists(midi_pkl_path):
@@ -70,7 +68,7 @@ class MidiDataLoader:
         pkl_value = self._try_read_pkl(pkl_path)
         data = {'artists': [], 'songs_names': [], 'lyrics': []}
         if pkl_value is not None:
-            data['artists'], data['songs_names'], data['lyrics'] =\
+            data['artists'], data['songs_names'], data['lyrics'] = \
                 pkl_value['artists'], pkl_value['songs_names'], pkl_value['lyrics']
             return data
         else:  # there is no pickle -> create new pickle file

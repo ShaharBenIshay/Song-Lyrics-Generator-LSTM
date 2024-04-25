@@ -19,7 +19,7 @@ class InputSequencesCreator:
 
     def get_word2vec_matrix(self, model_dict, index2word: dict):
         """ for each integer that represents a specific word we insert the word embedding vector to the matrix at
-        the index that correspond to the integer. """
+        the index that correspond to the integer """
         matrix_shape = (self.num_words, self.embedding_word_size)
         word_vectors_matrix = np.zeros(matrix_shape, dtype=int)
         for i, word in index2word.items():
@@ -48,11 +48,11 @@ class InputSequencesCreator:
                 melodies_for_curr_song = melodies_train[melodies_song_idx]
                 j = 0
             """ For every song loop number of sequences that should be in this song """
-            for i in range(0, len(words_as_int_lyrics_song)-sequence_len, sequence_len):
+            for i in range(0, len(words_as_int_lyrics_song) - sequence_len, sequence_len):
                 # lyrics
-                curr_sequence = words_as_int_lyrics_song[i:i+sequence_len]
+                curr_sequence = words_as_int_lyrics_song[i:i + sequence_len]
                 sequences_for_model_input.append(curr_sequence)
-                next_encoded_words.append(words_as_int_lyrics_song[i+sequence_len])
+                next_encoded_words.append(words_as_int_lyrics_song[i + sequence_len])
                 # melodies
                 if melodies_train is not None:
                     melody_curr_sequence_curr_song = melodies_for_curr_song[j]
@@ -63,13 +63,14 @@ class InputSequencesCreator:
         next_one_hot_words = self._convert_next_words_to_one_hot(sequences_for_model_input, next_encoded_words)
         return sequences_for_model_input, melodies_sequences_for_input, next_one_hot_words
 
-    def _create_data_sets_dict(self, train_words_as_int_lyrics_list, test_words_as_int_lyrics_list, melodies_train=None):
+    def _create_data_sets_dict(self, train_words_as_int_lyrics_list, test_words_as_int_lyrics_list,
+                               melodies_train=None):
         x_train_lyrics, x_train_melodies, y_train = self._create_sequences(train_words_as_int_lyrics_list,
                                                                            self.sequence_len,
                                                                            melodies_train)
         x_train_lyrics, x_val_lyrics, x_train_melodies, x_val_melodies = \
             self.separate_train_validation_sets(x_train_lyrics, x_train_melodies, self.validation_size)
-        y_train, y_val, _, _ = self.separate_train_validation_sets(y_train,[], self.validation_size)
+        y_train, y_val, _, _ = self.separate_train_validation_sets(y_train, [], self.validation_size)
         x_test, _, y_test = self._create_sequences(test_words_as_int_lyrics_list, self.sequence_len)
 
         if melodies_train is not None:
@@ -123,7 +124,8 @@ class InputSequencesCreator:
 
         train_words_as_int_lyrics_list = words_as_int_lyrics_list[:train_size]
         test_words_as_int_lyrics_list = words_as_int_lyrics_list[train_size:]
-        data_sets_dict = self._create_data_sets_dict(train_words_as_int_lyrics_list, test_words_as_int_lyrics_list, melodies_train)
+        data_sets_dict = self._create_data_sets_dict(train_words_as_int_lyrics_list, test_words_as_int_lyrics_list,
+                                                     melodies_train)
 
         train_loader, validation_loader = None, None
 
@@ -148,8 +150,8 @@ class InputSequencesCreator:
 
             train_tensor_dataset = TensorDataset(train_input_lyrics, train_input_melodies, train_y.long())
             train_loader = DataLoader(train_tensor_dataset, batch_size=batch_size, shuffle=True)
-            validation_tensor_dataset = TensorDataset(validation_input_lyrics.long(), validation_input_melodies.long(), validation_y.long())
+            validation_tensor_dataset = TensorDataset(validation_input_lyrics.long(), validation_input_melodies.long(),
+                                                      validation_y.long())
             validation_loader = DataLoader(validation_tensor_dataset, batch_size=batch_size, shuffle=True)
-
 
         return train_loader, validation_loader

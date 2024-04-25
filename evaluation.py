@@ -11,6 +11,7 @@ from textblob import TextBlob
 
 class LyricsEvaluator:
     """Class to generate and evaluate lyrics"""
+
     def __init__(self, word2vec_dict, index_to_word, testing_root_lyrics_per_song=1, sequence_len=1):
         self.word2vec_dict = word2vec_dict
         self.testing_root_lyrics_per_song = testing_root_lyrics_per_song  # = 3
@@ -83,7 +84,6 @@ class LyricsEvaluator:
                 curr_song_melody = list(chain(*curr_song_melody))
             else:
                 curr_song_melody = None
-            # TODO: eliminate same indexes from melodies
             curr_lyrics_in_word2vec = list(filter(lambda w: w in self.word2vec_dict, curr_lyrics))
 
             curr_sequence_to_generate_from = curr_lyrics_in_word2vec[0:sequence_len]
@@ -201,7 +201,6 @@ class LyricsEvaluator:
         df.reset_index(inplace=True)
         df.to_csv('blob_analysis.csv')
 
-
     def split_to_paragraphs(self, text, num_pargraphs):
         words = text
         pargraph_size = int(len(words) / num_pargraphs)
@@ -216,7 +215,6 @@ class LyricsEvaluator:
             song.append(" ".join(curr_paragraph).split())
         return song
 
-
     def paragraph_to_sentences(self, pargraph, num_sentences):
         sentences = []
         current_sentence = []
@@ -230,7 +228,6 @@ class LyricsEvaluator:
             sentences.append(" ".join(current_sentence))
         return sentences
 
-
     def transform_lyrics_to_song(self, full_song, num_paragraphs=4, num_sentences=4):
         print(f"Now we will show our generated song:" + '\n')
         paragraphs = self.split_to_paragraphs(full_song, num_paragraphs)
@@ -240,25 +237,21 @@ class LyricsEvaluator:
             for sentence in sentences:
                 print(sentence)
 
-
-    def show_generated_songs(self,generated_songs, num_paragraphs=4, num_sentences=4):
-        i = 1
+    def show_generated_songs(self, generated_songs, num_paragraphs=4, num_sentences=4):
         for song in generated_songs:
             print('-' * 50)
-            if i == 1:
-                self.transform_lyrics_to_song(song, 4, 4)
-            else:
-                self.transform_lyrics_to_song(song, 4, 4)
+            self.transform_lyrics_to_song(song, num_paragraphs, num_sentences)
             print('-' * 50)
-
 
     def cosine_similarity_between_songs(self, true_lyrics, generated_lyrics, word2vec_dict):
         all_songs_scores = []
         num_songs = len(true_lyrics)
         for i in range(num_songs):
             curr_true_lyrics, curr_generated_lyrics = true_lyrics[i], generated_lyrics[i]
-            true_sequence_mean_vector = np.mean([word2vec_dict[word] for word in curr_true_lyrics], axis=0).reshape(1, -1)
-            generated_sequence_mean_vector = np.mean([word2vec_dict[word] for word in curr_generated_lyrics], axis=0).reshape(1, -1)
+            true_sequence_mean_vector = np.mean([word2vec_dict[word] for word in curr_true_lyrics], axis=0).reshape(1,
+                                                                                                                    -1)
+            generated_sequence_mean_vector = np.mean([word2vec_dict[word] for word in curr_generated_lyrics],
+                                                     axis=0).reshape(1, -1)
             score = cosine_similarity(true_sequence_mean_vector, generated_sequence_mean_vector)[0][0]
             all_songs_scores.append(score)
         all_songs_mean_score = np.mean(all_songs_scores)

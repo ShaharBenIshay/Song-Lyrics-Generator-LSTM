@@ -13,6 +13,7 @@ import itertools
 
 def train_with_validation(model, loss_function, optimizer, train_loader, validation_loader, num_epochs,
                           device, tensor_board_signature):
+    """ Train model with validation for LSTMLyricsOnly model """
     train_epoch_loss_value = 0.0
     train_epochs_progress_bar = tqdm(iterable=range(1, num_epochs + 1), total=num_epochs,
                                      desc="Training Epochs", unit="epoch", position=0, colour='green')
@@ -72,6 +73,7 @@ def train_with_validation(model, loss_function, optimizer, train_loader, validat
 
 def train_with_validation_with_melodies(model, loss_function, optimizer, train_loader, validation_loader, num_epochs,
                                         device, tensor_board_signature):
+    """ Train model with validation for LSTMLyricsMelodies model """
     train_epoch_loss_value = 0.0
     train_epochs_progress_bar = tqdm(iterable=range(1, num_epochs + 1), total=num_epochs,
                                      desc="Training Epochs", unit="epoch", position=0, colour='green')
@@ -260,7 +262,7 @@ def run_one_experiment(seed,
     train_loader = None
     validation_loader = None
     word2vec_dict = None
-    return train_loss , cos_sim_score_comparing_sequences, jaccard_score, cos_sim_score_comparing_songs
+    return train_loss, cos_sim_score_comparing_sequences, jaccard_score, cos_sim_score_comparing_songs
 
 
 def run_different_experiments(batch_size_lst,
@@ -343,7 +345,7 @@ def run_different_experiments(batch_size_lst,
 if __name__ == '__main__':
     batch_size_lst = [32]
     sequence_len_lst = [5]
-    feature_extraction_type_lst = ['T1']
+    feature_extraction_type_lst = ['T2']
     model_name_lst = ['LSTMLyricsMelodies']
     num_LSTM_units_lst = [256]
     learning_rate_lst = [0.001]
