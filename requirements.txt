@@ -1,0 +1,10 @@
+numpy~=1.24.3
+torch~=2.2.1
+pandas~=1.5.3
+gensim~=4.3.2
+nltk~=3.8.1
+torchtext~=0.17.1
+tqdm~=4.65.0
+scikit-learn~=1.4.0
+vaderSentiment~=3.3.2
+TextBlob~=0.18.0
