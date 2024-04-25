@@ -1,6 +1,16 @@
 # Song-Lyrics-Generator-LSTM
 before explaining about our project, we should note that this is a work done in "Deep Learning" class and we where instructed to use PyTorch and not Keras. 
 
+## Table of Content:
+- Introduction
+- Dataset Anlysis & Preprocessing
+- Project Design
+- Model Architecture
+- Experiments & Results
+- Evaluation
+- Best Models Results using TensorBoard
+- Lyrics Generation
+
 ## Introduction:
 This project explores the use of Recurrent Neural Networks (RNNs) for music generation, specifically focusing on generating song lyrics that align with a provided melody. We aimed to develop a model that, given a starting sequence of words and a melody, could predict the next lyrics of the song, in a coherent and meaningful way.
 
@@ -108,8 +118,8 @@ Changes from Model #1:
 -	Concatenate Features layer – this layer is only defined in the forward pass. Its purpose is to add to the embedding layer, which consists of the features for the lyrics, the features that were extracted for the melodies, either of type T1 or T2 (the type affects the input size).
 -	In the forward pass of Model #2, after the embedding layer, the concatenation layer concatenates the melodies features to the embedding layer, and then the concatenation layer passes to the LSTM layer and so on, like in Model #1.
 
-## Experiments: 
-In this part, we focused on running multiple experiments to explore our models’ performance. We used different values for the following parameters in our experiments:
+## Experiments & Results: 
+In this part, we focused on running multiple experiments to explore our models’ performance. We used different values for the following parameters in our experimenExperimentsts:
 
 <img width="439" alt="image" src="https://github.com/ShaharBenIshay/Song-Lyrics-Generator-LSTM/assets/93884611/046e7fea-a542-45e2-b5a4-8b97bba9384b">
 
@@ -158,7 +168,7 @@ We ran those experiments with same parameters for the models:
 <img width="590" alt="image" src="https://github.com/ShaharBenIshay/Song-Lyrics-Generator-LSTM/assets/93884611/a28c0012-82c7-4bf5-a49f-643c4f66d0e3">
 
 
-## TensorBoard:
+## Best Models Results using TensorBoard:
 After finding optimal params, we compared our 3 model types and show the results in a tensor board. 
 
 ### Model-LSTMLyricsOnly
